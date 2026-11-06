@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Главная</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <div id="site-header"></div>
+  <main>
+    <h1>Главная</h1>
+    <p>Свежие публичные видео.</p>
+    <div id="feed"></div>
+    <div class="pager">
+      <button id="prev" type="button">Назад</button>
+      <span id="page-label"></span>
+      <button id="next" type="button">Дальше</button>
+    </div>
+    <p id="status" role="status"></p>
+  </main>
+  <script src="/static/api.js"></script>
+  <script>
+    const limit = 12;
+    let offset = 0;
+    let total = 0;
+    const feed = document.querySelector("#feed");
+    const status = document.querySelector("#status");
+    const pageLabel = document.querySelector("#page-label");
+
+    async function loadFeed() {
+      status.textContent = "Загружаем ленту…";
+      try {
+        const page = await MyTube.api(`/videos?limit=${limit}&offset=${offset}`);
+        total = page.total;
+        feed.innerHTML = MyTube.videoCards(page.items);
+        const current = Math.floor(offset / limit) + 1;
+        const pages = Math.max(1, Math.ceil(total / limit));
+        pageLabel.textContent = `Страница ${current} из ${pages}`;
+        document.querySelector("#prev").disabled = offset === 0;
+        document.querySelector("#next").disabled = offset + limit >= total;
+        status.textContent = "";
+      } catch (error) {
+        feed.innerHTML = "";
+        status.textContent = error.message;
+      }
+    }
+
+    document.querySelector("#prev").addEventListener("click", () => {
+      offset = Math.max(0, offset - limit);
+      loadFeed();
+    });
+    document.querySelector("#next").addEventListener("click", () => {
+      offset += limit;
+      loadFeed();
+    });
+    loadFeed();
+  </script>
+</body>
+</html>

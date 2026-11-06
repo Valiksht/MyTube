@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Вход</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <div id="site-header"></div>
+  <main>
+    <h1>Вход</h1>
+    <form id="login-form" class="panel">
+      <label for="email">Email</label>
+      <input id="email" type="email" autocomplete="username" required>
+      <label for="password">Пароль</label>
+      <input id="password" type="password" autocomplete="current-password" required>
+      <button type="submit">Войти</button>
+    </form>
+    <form id="register-form" class="panel">
+      <h2>Регистрация</h2>
+      <label for="new-email">Email</label>
+      <input id="new-email" type="email" required>
+      <label for="username">Имя пользователя</label>
+      <input id="username" minlength="3" maxlength="50" required>
+      <label for="new-password">Пароль</label>
+      <input id="new-password" type="password" minlength="8" required>
+      <button type="submit">Создать аккаунт</button>
+    </form>
+    <p id="status" role="status"></p>
+  </main>
+  <script src="/static/api.js"></script>
+  <script>
+    const status = document.querySelector("#status");
+
+    async function enter(path, payload) {
+      status.textContent = "Отправляем…";
+      try {
+        const body = await MyTube.api(path, { method: "POST", json: payload });
+        MyTube.setToken(body.access_token);
+        location.href = "/";
+      } catch (error) {
+        status.textContent = error.message;
+      }
+    }
+
+    document.querySelector("#login-form").addEventListener("submit", (event) => {
+      event.preventDefault();
+      enter("/auth/login", {
+        email: document.querySelector("#email").value,
+        password: document.querySelector("#password").value,
+      });
+    });
+
+    document.querySelector("#register-form").addEventListener("submit", (event) => {
+      event.preventDefault();
+      enter("/auth/register", {
+        email: document.querySelector("#new-email").value,
+        username: document.querySelector("#username").value,
+        password: document.querySelector("#new-password").value,
+      });
+    });
+  </script>
+</body>
+</html>

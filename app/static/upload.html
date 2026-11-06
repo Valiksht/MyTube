@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Загрузка</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <div id="site-header"></div>
+  <main>
+    <h1>Загрузка</h1>
+    <p>Файл уходит в хранилище. Полоса показывает, сколько байт уже отправлено.</p>
+    <form id="upload-form">
+      <label for="title">Название</label>
+      <input id="title" name="title" maxlength="200" required>
+      <label for="description">Описание</label>
+      <textarea id="description" name="description" maxlength="5000" rows="3"></textarea>
+      <label for="visibility">Кто может смотреть</label>
+      <select id="visibility" name="visibility">
+        <option value="public">Публичное</option>
+        <option value="private">Приватное</option>
+      </select>
+      <label for="file">Видеофайл</label>
+      <input id="file" name="file" type="file" accept="video/mp4,video/webm,video/quicktime,.mkv,.ogg" required>
+      <progress id="upload-progress" max="100" value="0"></progress>
+      <span id="upload-percent">0%</span>
+      <button id="upload-button" type="submit">Загрузить</button>
+    </form>
+    <p id="status" role="status"></p>
+  </main>
+  <script src="/static/api.js"></script>
+  <script>
+    const form = document.querySelector("#upload-form");
+    const progress = document.querySelector("#upload-progress");
+    const percent = document.querySelector("#upload-percent");
+    const status = document.querySelector("#status");
+    const button = document.querySelector("#upload-button");
+
+    function setProgress(loaded, total) {
+      const value = total > 0 ? Math.round((loaded / total) * 100) : 0;
+      progress.value = value;
+      percent.textContent = value + "%";
+    }
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const accessToken = MyTube.token();
+      if (!accessToken) {
+        status.textContent = "Сначала войдите";
+        return;
+      }
+      const file = document.querySelector("#file").files[0];
+      const payload = new FormData();
+      payload.append("title", document.querySelector("#title").value);
+      payload.append("description", document.querySelector("#description").value);
+      payload.append("visibility", document.querySelector("#visibility").value);
+      payload.append("file", file);
+
+      const request = new XMLHttpRequest();
+      request.open("POST", "/videos");
+      request.setRequestHeader("Authorization", "Bearer " + accessToken);
+      request.upload.addEventListener("progress", (progressEvent) => {
+        if (progressEvent.lengthComputable) {
+          setProgress(progressEvent.loaded, progressEvent.total);
+        }
+      });
+      request.addEventListener("load", () => {
+        button.disabled = false;
+        let body = {};
+        try {
+          body = JSON.parse(request.responseText);
+        } catch (_error) {
+          status.textContent = "Сервер не ответил";
+          return;
+        }
+        if (request.status >= 200 && request.status < 300) {
+          status.textContent = "Видео загружено";
+          location.href = `/watch?id=${encodeURIComponent(body.id)}`;
+          return;
+        }
+        status.textContent = typeof body.detail === "string" ? body.detail : "Не удалось загрузить";
+      });
+      request.addEventListener("error", () => {
+        button.disabled = false;
+        status.textContent = "Сеть оборвала загрузку";
+      });
+      button.disabled = true;
+      setProgress(0, 100);
+      status.textContent = "";
+      request.send(payload);
+    });
+  </script>
+</body>
+</html>

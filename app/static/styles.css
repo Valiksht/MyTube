@@ -1,0 +1,133 @@
+:root {
+  color-scheme: light;
+  font-family: Georgia, "Times New Roman", serif;
+  background: #f4f1ea;
+  color: #1c1915;
+}
+
+body {
+  margin: 0;
+}
+
+a {
+  color: #6b3f1d;
+}
+
+header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.9rem 1.25rem;
+  background: #fffdf8;
+  border-bottom: 1px solid #d9d1c3;
+}
+
+header .brand {
+  font-size: 1.35rem;
+  font-weight: 700;
+  text-decoration: none;
+  color: #1c1915;
+}
+
+nav {
+  display: flex;
+  gap: 0.9rem;
+}
+
+header form {
+  display: flex;
+  gap: 0.4rem;
+}
+
+main {
+  max-width: 64rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 3rem;
+}
+
+h1 {
+  margin-bottom: 0.35rem;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: 0.9rem;
+  padding: 0;
+  list-style: none;
+}
+
+.card, form, .panel, .comment {
+  background: #fffdf8;
+  border: 1px solid #d9d1c3;
+  border-radius: 8px;
+}
+
+.card, .panel, .comment {
+  padding: 0.9rem 1rem;
+}
+
+.card h2, .comment p {
+  margin: 0.2rem 0 0.45rem;
+}
+
+.meta, #status {
+  font-family: "Segoe UI", sans-serif;
+  font-size: 0.9rem;
+}
+
+label {
+  display: block;
+  margin: 0.75rem 0 0.25rem;
+  font-family: "Segoe UI", sans-serif;
+}
+
+input, select, textarea, button {
+  font: inherit;
+}
+
+input, select, textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.45rem 0.55rem;
+}
+
+header input {
+  width: 14rem;
+}
+
+button, .button {
+  display: inline-block;
+  margin-top: 0.8rem;
+  background: #1c1915;
+  color: #fffdf8;
+  border: 0;
+  border-radius: 6px;
+  padding: 0.5rem 0.85rem;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: progress;
+}
+
+video, progress {
+  width: 100%;
+  margin-top: 0.8rem;
+}
+
+.comments {
+  display: grid;
+  gap: 0.7rem;
+  margin-top: 1rem;
+}
+
+.pager {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+}

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Канал</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <div id="site-header"></div>
+  <main>
+    <h1 id="name">Канал</h1>
+    <p id="handle" class="meta"></p>
+    <p id="description"></p>
+    <div id="videos"></div>
+    <p id="status" role="status"></p>
+  </main>
+  <script src="/static/api.js"></script>
+  <script>
+    const params = new URLSearchParams(location.search);
+    const channelId = params.get("id");
+    const status = document.querySelector("#status");
+
+    async function loadChannel() {
+      if (!channelId) {
+        status.textContent = "Не указан канал";
+        return;
+      }
+      try {
+        const channel = await MyTube.api(`/channels/${channelId}`);
+        document.querySelector("#name").textContent = channel.name;
+        document.title = channel.name;
+        document.querySelector("#handle").textContent = "@" + channel.handle;
+        document.querySelector("#description").textContent = channel.description;
+        const page = await MyTube.api(`/channels/${channelId}/videos`);
+        document.querySelector("#videos").innerHTML = MyTube.videoCards(page.items);
+        status.textContent = "";
+      } catch (error) {
+        status.textContent = error.message;
+      }
+    }
+
+    loadChannel();
+  </script>
+</body>
+</html>

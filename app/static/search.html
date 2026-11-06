@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Поиск</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <div id="site-header"></div>
+  <main>
+    <h1>Поиск</h1>
+    <form id="search-form">
+      <label for="q">Название</label>
+      <input id="q" name="q" type="search" required>
+      <button type="submit">Найти</button>
+    </form>
+    <div id="results"></div>
+    <p id="status" role="status"></p>
+  </main>
+  <script src="/static/api.js"></script>
+  <script>
+    const params = new URLSearchParams(location.search);
+    const input = document.querySelector("#q");
+    const results = document.querySelector("#results");
+    const status = document.querySelector("#status");
+    input.value = params.get("q") || "";
+
+    async function runSearch(query) {
+      status.textContent = "Ищем…";
+      try {
+        const page = await MyTube.api(`/videos/search?q=${encodeURIComponent(query)}`);
+        results.innerHTML = MyTube.videoCards(page.items);
+        status.textContent = `Найдено: ${page.total}`;
+      } catch (error) {
+        results.innerHTML = "";
+        status.textContent = error.message;
+      }
+    }
+
+    document.querySelector("#search-form").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const query = input.value.trim();
+      history.replaceState(null, "", `/search?q=${encodeURIComponent(query)}`);
+      runSearch(query);
+    });
+
+    if (input.value.trim()) {
+      runSearch(input.value.trim());
+    }
+  </script>
+</body>
+</html>
