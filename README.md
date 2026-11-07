@@ -34,6 +34,8 @@ docker compose down
 | postgres | 5432 | База `mytube` |
 | minio | 9000, 9001 | Хранилище видео и консоль |
 
+Образы MinIO берутся с зеркала Timeweb. Каталог `bitnami/minio` с Docker Hub снят, поэтому Compose использует `dockerhub.timeweb.cloud/bitnamilegacy/minio` и `dockerhub.timeweb.cloud/bitnamilegacy/minio-client`. Сервер Bitnami сам запускает `minio server`, данные лежат в томе `/bitnami/minio/data`, процесс работает от пользователя `1001`. Бакет `mytube` создаётся при старте.
+
 Внутри сети Compose API ходит в базу по адресу `postgres:5432`, а в MinIO — по `minio:9000`. Эти адреса заданы в `docker-compose.yml` и не берутся из локального `.env`.
 
 ## Учётные данные для разработки

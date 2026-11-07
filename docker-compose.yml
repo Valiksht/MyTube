@@ -55,34 +55,48 @@ services:
     restart: unless-stopped
 
   minio:
-    image: quay.io/minio/minio:latest
-    command: server /data --console-address ":9001"
+    # dockerhub.timeweb.cloud/bitnami/minio:latest больше нет на Docker Hub.
+    # Зеркало отдаёт тот же образ Bitnami из bitnamilegacy.
+    image: dockerhub.timeweb.cloud/bitnamilegacy/minio:latest
     environment:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
+      MINIO_BROWSER: "on"
+      MINIO_SCHEME: http
+      MINIO_API_PORT_NUMBER: "9000"
+      MINIO_CONSOLE_PORT_NUMBER: "9001"
+      MINIO_DATA_DIR: /bitnami/minio/data
+      MINIO_DEFAULT_BUCKETS: mytube
+      MINIO_STARTUP_TIMEOUT: "60"
     ports:
       - "9000:9000"
       - "9001:9001"
     volumes:
-      - minio_data:/data
+      - minio_data:/bitnami/minio/data
     healthcheck:
-      test: ["CMD", "mc", "ready", "local"]
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:9000/minio/health/live"]
       interval: 5s
       timeout: 5s
       retries: 20
-      start_period: 10s
+      start_period: 30s
     restart: unless-stopped
 
   minio-init:
-    image: quay.io/minio/mc:latest
+    image: dockerhub.timeweb.cloud/bitnamilegacy/minio-client:latest
+    environment:
+      MINIO_SERVER_HOST: minio
+      MINIO_SERVER_PORT_NUMBER: "9000"
+      MINIO_SERVER_SCHEME: http
+      MINIO_SERVER_ROOT_USER: minioadmin
+      MINIO_SERVER_ROOT_PASSWORD: minioadmin
     depends_on:
       minio:
         condition: service_healthy
-    entrypoint: >
-      /bin/sh -c "
-      mc alias set local http://minio:9000 minioadmin minioadmin &&
-      mc mb --ignore-existing local/mytube
-      "
+    command:
+      - /opt/bitnami/scripts/minio-client/run.sh
+      - mb
+      - --ignore-existing
+      - minio/mytube
     restart: "no"
 
 volumes:
